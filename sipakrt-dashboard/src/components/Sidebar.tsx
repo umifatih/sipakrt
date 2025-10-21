@@ -1,23 +1,21 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAccess } from '@/components/AccessProvider';
 
 const NAV = [
-  { key: 'dashboard', href: '/', label: 'Dashboard', icon: '🏠' },
-  { key: 'citizens', href: '/citizens', label: 'Data Warga', icon: '👥', admin: true },
-  { key: 'services', href: '/services', label: 'Layanan Surat', icon: '📄' },
-  { key: 'finance', href: '/finance', label: 'Keuangan', icon: '💰' },
-  { key: 'patrol', href: '/patrol', label: 'Jadwal Ronda', icon: '🛡️' },
-  { key: 'announcements', href: '/announcements', label: 'Pengumuman & Event', icon: '📢' },
-  { key: 'reports', href: '/reports', label: 'Laporan & Aspirasi', icon: '💬' },
-  { key: 'settings', href: '/settings', label: 'Pengaturan', icon: '⚙️', admin: true },
+  { key: 'dashboard',     href: '/',             label: 'Dashboard',         icon: '🏠' },
+  { key: 'services',      href: '/services',     label: 'Layanan Surat',     icon: '📄' },
+  { key: 'billing',       href: '/billing',      label: 'Tagihan & Iuran',   icon: '💳' },
+  { key: 'finance',       href: '/finance',      label: 'Keuangan',          icon: '💰' },
+  { key: 'patrol',        href: '/patrol',       label: 'Jadwal Ronda',      icon: '🛡️' },
+  { key: 'events',        href: '/events',       label: 'Kegiatan',          icon: '📅' },
+  { key: 'announcements', href: '/announcements',label: 'Pengumuman',        icon: '📢' },
+  { key: 'reports',       href: '/reports',      label: 'Laporan & Aspirasi',icon: '💬' },
+  { key: 'profile',       href: '/profile',      label: 'Profil Saya',       icon: '🙋‍♂️' },
 ];
 
 export default function Sidebar() {
-  const { isAdmin } = useAccess();
   const pathname = usePathname();
-  const items = NAV.filter((i) => (i.admin ? isAdmin : true));
   return (
     <aside className="w-64 shrink-0 hidden md:flex md:flex-col gap-2 p-4 bg-white/80 backdrop-blur border-r border-slate-100">
       <div className="flex items-center gap-2 px-2 py-1">
@@ -28,7 +26,7 @@ export default function Sidebar() {
         </div>
       </div>
       <nav className="mt-4 grid gap-1">
-        {items.map((item) => {
+        {NAV.map(item => {
           const active = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
           return (
             <Link
@@ -44,7 +42,7 @@ export default function Sidebar() {
           );
         })}
       </nav>
-      <div className="mt-auto p-3 text-xs text-slate-500">v0.2 – TS UI</div>
+      <div className="mt-auto p-3 text-xs text-slate-500">v0.2 – Warga</div>
     </aside>
   );
 }

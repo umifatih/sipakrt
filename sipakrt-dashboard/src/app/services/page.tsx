@@ -1,100 +1,269 @@
-'use client';
-import { useState } from 'react';
-import Card from '@/components/Card';
-import Button from '@/components/Button';
-import Badge from '@/components/Badge';
-import Modal from '@/components/Modal';
-import TextField from '@/components/TextField';
+'use client';  // <-- Tambahkan ini di paling atas
 
-type Row = { n:string; j:string; t:string; s:'Menunggu'|'Disetujui'|'Ditolak' };
-const rowsInitial: Row[] = [
-  { n: 'Andi', j: 'Domisili', t: '10/10', s: 'Menunggu' },
-  { n: 'Budi', j: 'SKTM', t: '12/10', s: 'Disetujui' },
-  { n: 'Cici', j: 'Pengantar Nikah', t: '13/10', s: 'Ditolak' },
+import { useState } from 'react';
+import { FileText, Clock, CheckCircle, Eye, Upload } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
+
+const riwayatSurat = [
+  { id: 1, type: 'Surat Pengantar KTP', date: '15 Okt 2025', status: 'Selesai', icon: CheckCircle, color: 'text-green-500' },
+  { id: 2, type: 'Surat Keterangan Domisili', date: '18 Okt 2025', status: 'Diproses', icon: Clock, color: 'text-orange-500' },
+  { id: 3, type: 'Surat Pengantar SKCK', date: '20 Okt 2025', status: 'Menunggu', icon: Clock, color: 'text-blue-500' },
 ];
 
-export default function Page() {
-  const [rows, setRows] = useState<Row[]>(rowsInitial);
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ jenis: 'Domisili', tujuan: '', keterangan: '' });
+export function LayananSurat() {
+  const [step, setStep] = useState(1);
+  const [jenisSurat, setJenisSurat] = useState('');
 
-  const submit = () => {
-    setRows([{ n:'Saya', j:form.jenis, t: new Date().toLocaleDateString('id-ID'), s:'Menunggu' }, ...rows]);
-    setOpen(false);
+  const handleSubmit = () => {
+    toast.success('Permohonan surat berhasil diajukan!');
+    setStep(1);
+    setJenisSurat('');
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold">Layanan Surat</h2>
-          <p className="text-slate-600 text-sm">Ajukan & pantau pengantar RT</p>
-        </div>
-        <Button variant="primary" onClick={()=>setOpen(true)}>+ Ajukan Surat</Button>
-      </div>
-
-      <Card className="p-5">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-slate-800">Pengajuan Saya</h3>
-          <div className="flex gap-2">
-            <Button variant="ghost">Semua</Button>
-            <Button variant="ghost">Menunggu</Button>
-            <Button variant="ghost">Disetujui</Button>
-          </div>
-        </div>
-        <div className="mt-3 overflow-auto">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="text-left text-slate-500">
-                <th className="py-2 pr-4">Nama</th>
-                <th className="py-2 pr-4">Jenis Surat</th>
-                <th className="py-2 pr-4">Tanggal</th>
-                <th className="py-2 pr-4">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row, i) => (
-                <tr key={i} className="border-t border-slate-100">
-                  <td className="py-3 pr-4">{row.n}</td>
-                  <td className="py-3 pr-4">{row.j}</td>
-                  <td className="py-3 pr-4">{row.t}</td>
-                  <td className="py-3 pr-4">
-                    <Badge color={row.s === 'Disetujui' ? 'emerald' : row.s === 'Menunggu' ? 'amber' : 'rose'}>{row.s}</Badge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-
-      <Modal open={open} onClose={()=>setOpen(false)} title="Ajukan Surat">
-        <div className="grid gap-3">
-          <label className="text-sm text-slate-700">Jenis Surat</label>
-          <select
-            className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
-            value={form.jenis}
-            onChange={(e)=>setForm(f=>({...f, jenis: e.target.value}))}
+    <div className="max-w-6xl mx-auto">
+      <Tabs defaultValue="buat" className="space-y-6">
+        <TabsList className="bg-white rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.06)] p-1.5">
+          <TabsTrigger 
+            value="buat" 
+            className="rounded-lg data-[state=active]:bg-[#007BFF] data-[state=active]:text-white data-[state=active]:shadow-[0_4px_12px_rgba(0,123,255,0.3)]"
           >
-            <option>Domisili</option>
-            <option>SKTM</option>
-            <option>Pengantar Nikah</option>
-            <option>Lainnya</option>
-          </select>
-          <TextField label="Tujuan" placeholder="Keperluan surat..." value={form.tujuan} onChange={e=>setForm(f=>({...f, tujuan: e.target.value}))} />
-          <label className="text-sm text-slate-700">Keterangan</label>
-          <textarea
-            className="rounded-xl border border-slate-200 px-3 py-2 text-sm min-h-[96px]"
-            placeholder="Isi keterangan tambahan…"
-            value={form.keterangan}
-            onChange={(e)=>setForm(f=>({...f, keterangan: e.target.value}))}
-          />
-        </div>
-        <div className="mt-4 flex justify-end gap-2">
-          <Button variant="outline" onClick={()=>setOpen(false)}>Batal</Button>
-          <Button variant="primary" onClick={submit}>Kirim</Button>
-        </div>
-      </Modal>
+            Buat Surat Baru
+          </TabsTrigger>
+          <TabsTrigger 
+            value="riwayat"
+            className="rounded-lg data-[state=active]:bg-[#007BFF] data-[state=active]:text-white data-[state=active]:shadow-[0_4px_12px_rgba(0,123,255,0.3)]"
+          >
+            Riwayat Surat
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Buat Surat Baru */}
+        <TabsContent value="buat">
+          <Card className="bg-white rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.06)] border-0 p-8">
+            {/* Progress Steps */}
+            <div className="flex items-center justify-center mb-8">
+              {[1, 2, 3, 4].map((s) => (
+                <div key={s} className="flex items-center">
+                  <div 
+                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                      step >= s 
+                        ? 'bg-[#007BFF] text-white shadow-[0_4px_12px_rgba(0,123,255,0.3)]' 
+                        : 'bg-gray-200 text-gray-500'
+                    }`}
+                  >
+                    {s}
+                  </div>
+                  {s < 4 && (
+                    <div 
+                      className={`w-16 h-1 mx-2 rounded transition-all duration-300 ${
+                        step > s ? 'bg-[#007BFF]' : 'bg-gray-200'
+                      }`}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Step 1: Pilih Jenis Surat */}
+            {step === 1 && (
+              <div className="space-y-6 animate-in fade-in duration-300">
+                <div className="text-center mb-6">
+                  <h3 className="text-gray-800 mb-2">Pilih Jenis Surat</h3>
+                  <p className="text-gray-500">Pilih jenis surat yang ingin Anda ajukan</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[
+                    'Surat Pengantar KTP',
+                    'Surat Keterangan Domisili',
+                    'Surat Pengantar SKCK',
+                    'Surat Keterangan Usaha',
+                  ].map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => {
+                        setJenisSurat(type);
+                        setStep(2);
+                      }}
+                      className="p-6 rounded-xl border-2 border-gray-200 hover:border-[#007BFF] hover:bg-[#E8F1FB] transition-all duration-300 text-left group"
+                    >
+                      <FileText className="w-8 h-8 text-gray-400 group-hover:text-[#007BFF] mb-3 transition-colors" />
+                      <p className="text-gray-800">{type}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Isi Keperluan */}
+            {step === 2 && (
+              <div className="space-y-6 animate-in fade-in duration-300">
+                <div className="text-center mb-6">
+                  <h3 className="text-gray-800 mb-2">Isi Keperluan</h3>
+                  <p className="text-gray-500">Jelaskan keperluan surat ini</p>
+                </div>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Keperluan</Label>
+                    <Textarea 
+                      placeholder="Contoh: Untuk pembuatan KTP baru"
+                      className="rounded-xl border-gray-200 focus:border-[#007BFF] min-h-[120px]"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Keterangan Tambahan (Opsional)</Label>
+                    <Textarea 
+                      placeholder="Tambahkan keterangan jika diperlukan"
+                      className="rounded-xl border-gray-200 focus:border-[#007BFF] min-h-[80px]"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setStep(1)}
+                    className="flex-1 rounded-xl"
+                  >
+                    Kembali
+                  </Button>
+                  <Button
+                    onClick={() => setStep(3)}
+                    className="flex-1 bg-[#007BFF] hover:bg-[#0056d2] text-white rounded-xl"
+                  >
+                    Lanjut
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Upload Dokumen */}
+            {step === 3 && (
+              <div className="space-y-6 animate-in fade-in duration-300">
+                <div className="text-center mb-6">
+                  <h3 className="text-gray-800 mb-2">Unggah Dokumen</h3>
+                  <p className="text-gray-500">Upload dokumen pendukung jika diperlukan</p>
+                </div>
+                <div className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:border-[#007BFF] hover:bg-[#E8F1FB] transition-all duration-300 cursor-pointer group">
+                  <Upload className="w-12 h-12 text-gray-400 group-hover:text-[#007BFF] mx-auto mb-4 transition-colors" />
+                  <p className="text-gray-600 mb-2">Klik atau drag file ke sini</p>
+                  <p className="text-sm text-gray-400">Format: PDF, JPG, PNG (Max 5MB)</p>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setStep(2)}
+                    className="flex-1 rounded-xl"
+                  >
+                    Kembali
+                  </Button>
+                  <Button
+                    onClick={() => setStep(4)}
+                    className="flex-1 bg-[#007BFF] hover:bg-[#0056d2] text-white rounded-xl"
+                  >
+                    Lanjut
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 4: Konfirmasi */}
+            {step === 4 && (
+              <div className="space-y-6 animate-in fade-in duration-300">
+                <div className="text-center mb-6">
+                  <h3 className="text-gray-800 mb-2">Konfirmasi Pengajuan</h3>
+                  <p className="text-gray-500">Pastikan data Anda sudah benar</p>
+                </div>
+                <div className="space-y-4">
+                  <div className="p-4 rounded-xl bg-[#E8F1FB]">
+                    <p className="text-sm text-gray-500 mb-1">Jenis Surat</p>
+                    <p className="text-gray-800">{jenisSurat}</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-[#E8F1FB]">
+                    <p className="text-sm text-gray-500 mb-1">Pemohon</p>
+                    <p className="text-gray-800">Budi Santoso</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-[#E8F1FB]">
+                    <p className="text-sm text-gray-500 mb-1">Estimasi Selesai</p>
+                    <p className="text-gray-800">3 hari kerja</p>
+                  </div>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setStep(3)}
+                    className="flex-1 rounded-xl"
+                  >
+                    Kembali
+                  </Button>
+                  <Button
+                    onClick={handleSubmit}
+                    className="flex-1 bg-[#007BFF] hover:bg-[#0056d2] text-white rounded-xl"
+                  >
+                    Ajukan Surat
+                  </Button>
+                </div>
+              </div>
+            )}
+          </Card>
+        </TabsContent>
+
+        {/* Riwayat Surat */}
+        <TabsContent value="riwayat">
+          <div className="space-y-4">
+            {riwayatSurat.map((surat) => {
+              const Icon = surat.icon;
+              return (
+                <Card 
+                  key={surat.id}
+                  className="bg-white rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.06)] border-0 p-6 hover:shadow-[0_8px_24px_rgba(0,123,255,0.15)] transition-all duration-300 hover:-translate-y-1"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-xl ${surat.status === 'Selesai' ? 'bg-green-100' : surat.status === 'Diproses' ? 'bg-orange-100' : 'bg-blue-100'} flex items-center justify-center`}>
+                        <Icon className={`w-6 h-6 ${surat.color}`} />
+                      </div>
+                      <div>
+                        <p className="text-gray-800 mb-1">{surat.type}</p>
+                        <p className="text-sm text-gray-500">{surat.date}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Badge 
+                        variant="outline"
+                        className={`${
+                          surat.status === 'Selesai' 
+                            ? 'border-green-200 text-green-600 bg-green-50' 
+                            : surat.status === 'Diproses'
+                            ? 'border-orange-200 text-orange-600 bg-orange-50'
+                            : 'border-blue-200 text-blue-600 bg-blue-50'
+                        }`}
+                      >
+                        {surat.status}
+                      </Badge>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="rounded-xl hover:bg-[#E8F1FB] hover:border-[#007BFF]"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
+export default LayananSurat;

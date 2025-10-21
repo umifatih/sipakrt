@@ -1,48 +1,87 @@
 'use client';
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import {
+  Home, Users, FileText, Wallet, Shield, Calendar, MessageSquare, User, LogOut,
+} from 'lucide-react';
 
-const NAV = [
-  { key: 'dashboard',     href: '/',             label: 'Dashboard',         icon: '🏠' },
-  { key: 'services',      href: '/services',     label: 'Layanan Surat',     icon: '📄' },
-  { key: 'billing',       href: '/billing',      label: 'Tagihan & Iuran',   icon: '💳' },
-  { key: 'finance',       href: '/finance',      label: 'Keuangan',          icon: '💰' },
-  { key: 'patrol',        href: '/patrol',       label: 'Jadwal Ronda',      icon: '🛡️' },
-  { key: 'events',        href: '/events',       label: 'Kegiatan',          icon: '📅' },
-  { key: 'announcements', href: '/announcements',label: 'Pengumuman',        icon: '📢' },
-  { key: 'reports',       href: '/reports',      label: 'Laporan & Aspirasi',icon: '💬' },
-  { key: 'profile',       href: '/profile',      label: 'Profil Saya',       icon: '🙋‍♂️' },
+const MENU = [
+  { href: '/', label: 'Home', icon: Home },
+  { href: '/data', label: 'Data', icon: Users, disabled: true },
+  { href: '/services', label: 'Layanan', icon: FileText },
+  { href: '/finance', label: 'Keuangan', icon: Wallet },
+  { href: '/patrol', label: 'Ronda', icon: Shield },
+  { href: '/events', label: 'Event', icon: Calendar },
+  { href: '/announcements', label: 'Aspirasi', icon: MessageSquare },
+  { href: '/profile', label: 'Profil', icon: User },
 ];
 
-export default function Sidebar() {
+function Sidebar() {
   const pathname = usePathname();
+
   return (
-    <aside className="w-64 shrink-0 hidden md:flex md:flex-col gap-2 p-4 bg-white/80 backdrop-blur border-r border-slate-100">
-      <div className="flex items-center gap-2 px-2 py-1">
-        <div className="h-9 w-9 rounded-xl bg-brand grid place-items-center text-white text-lg">RT</div>
-        <div>
-          <div className="font-semibold text-slate-800">SIPAKRT</div>
-          <div className="text-xs text-slate-500">Community Dashboard</div>
+    <aside className="fixed left-0 top-0 h-screen w-64 bg-white/70 backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] z-50">
+      <div className="p-6">
+        <div className="flex items-center gap-3 mb-12">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#007BFF] to-[#0056d2] flex items-center justify-center shadow-lg">
+            <Home className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-[#007BFF] tracking-tight">SIPAKRT</h1>
+            <p className="text-sm text-gray-500">Sistem Informasi RT</p>
+          </div>
+        </div>
+
+        <nav className="space-y-2">
+          {MENU.map((m) => {
+            const Icon = m.icon;
+            const active = m.href === '/'
+              ? pathname === '/'
+              : pathname.startsWith(m.href);
+
+            return m.disabled ? (
+              <div
+                key={m.href}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 cursor-not-allowed"
+              >
+                <Icon className="w-5 h-5" />
+                <span>{m.label}</span>
+              </div>
+            ) : (
+              <Link
+                key={m.href}
+                href={m.href}
+                className={[
+                  'w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ease-out',
+                  active
+                    ? 'bg-[#007BFF] text-white shadow-[0_4px_16px_rgba(0,123,255,0.3)]'
+                    : 'text-gray-600 hover:bg-[#E8F1FB] hover:text-[#007BFF]',
+                ].join(' ')}
+              >
+                <Icon className="w-5 h-5" />
+                <span>{m.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <button
+          onClick={() => {/* TODO: handle logout */}}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-red-50 hover:text-red-500 transition-all duration-300 ease-out mt-8"
+        >
+          <LogOut className="w-5 h-5" />
+          <span>Logout</span>
+        </button>
+      </div>
+
+      <div className="absolute bottom-6 left-6 right-6">
+        <div className="bg-gradient-to-r from-[#E8F1FB] to-[#C8E6C9] rounded-xl p-4">
+          <p className="text-xs text-gray-600">🔒 Sistem ini menerapkan akses berbasis peran (RBAC)</p>
         </div>
       </div>
-      <nav className="mt-4 grid gap-1">
-        {NAV.map(item => {
-          const active = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
-          return (
-            <Link
-              key={item.key}
-              href={item.href}
-              className={`rounded-xl px-3 py-2 text-sm font-medium border transition hover:bg-slate-50 ${
-                active ? 'bg-brand-50 border-brand-50 text-brand' : 'border-transparent text-slate-700'
-              }`}
-            >
-              <span className="mr-2">{item.icon}</span>
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
-      <div className="mt-auto p-3 text-xs text-slate-500">v0.2 – Warga</div>
     </aside>
   );
 }
+
+export default Sidebar;

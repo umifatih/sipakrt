@@ -17,11 +17,10 @@ export function Calendar({
   ...props
 }: Props) {
   const iconComponents: DayPickerProps["components"] = {
-    IconLeft: ({ className, ...rest }: IconProps) => (
+    Chevron: ({ className, ...rest }: IconProps) => (
       <ChevronLeft className={cn("size-4", className)} {...rest} />
     ),
-    IconRight: ({ className, ...rest }: IconProps) => (
-      <ChevronRight className={cn("size-4", className)} {...rest} />
+     className)} {...rest} />
     ),
   };
 

@@ -1,0 +1,158 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Warga {
+  id        Int      @id @default(autoincrement())
+  nama      String
+  nik       String   @unique
+  noKk      String?
+  alamat    String
+  noHp      String?
+  status    String   @default("AKTIF") // AKTIF / PINDAH / MENINGGAL, dll
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rondaShifts RondaShift[]
+  laporan   Laporan[] 
+}
+
+model Surat {
+  id           Int      @id @default(autoincrement())
+  pemohonNama  String
+  pemohonEmail String?
+  jenis        String // contoh: "Surat Pengantar KTP"
+  keperluan    String // keperluan utama
+  keterangan   String? // keterangan tambahan
+  status       String   @default("PENDING") // PENDING / DIPROSES / SELESAI / DITOLAK
+  catatanAdmin String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Transaksi {
+  id        Int      @id @default(autoincrement())
+  tanggal   DateTime
+  tipe      String // 'PEMASUKAN' atau 'PENGELUARAN'
+  deskripsi String
+  kategori  String
+  jumlah    Int // dalam rupiah
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TagihanKas {
+  id         Int      @id @default(autoincrement())
+  judul      String
+  deskripsi  String?
+  jumlah     Int
+  jatuhTempo DateTime
+  status     String   @default("BELUM_BAYAR") // BELUM_BAYAR | LUNAS | TERLAMBAT | DIBATALKAN
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String
+  createdAt    DateTime @default(now())
+}
+
+model RondaShift {
+  id         Int      @id @default(autoincrement())
+  tanggal    DateTime
+  shiftKe    Int
+  jamMulai   String
+  jamSelesai String
+
+  // relasi ke warga (optional biar migration jalan)
+  wargaId Int?
+  warga   Warga? @relation(fields: [wargaId], references: [id])
+
+  // ✅ relasi balik ke permintaan tukar jadwal
+  swapRequestsFrom RondaSwapRequest[] @relation("RondaSwapFrom")
+  swapRequestsTo   RondaSwapRequest[] @relation("RondaSwapTo")
+
+  createdAt DateTime @default(now())
+}
+
+model RondaSwapRequest {
+  id          Int      @id @default(autoincrement())
+  fromShiftId Int
+  toShiftId   Int
+  alasan      String?
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
+
+  fromShift RondaShift @relation("RondaSwapFrom", fields: [fromShiftId], references: [id])
+  toShift   RondaShift @relation("RondaSwapTo", fields: [toShiftId], references: [id])
+}
+
+model Announcement {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  date      DateTime
+  emoji     String? // optional, buat icon kaya 💰, 📢 dll
+  category  String? // contoh: "Keuangan", "Keamanan"
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Event {
+  id              Int      @id @default(autoincrement())
+  title           String
+  date            DateTime
+  timeStart       String?   // jam mulai (nullable)
+  timeEnd         String?   // jam selesai (nullable)
+  location        String
+  description     String
+  emoji           String?   // 🎉, 🧹, dll
+  category        String?   // Kegiatan, Olahraga, dll
+  participants    Int       @default(0)
+  maxParticipants Int?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Laporan {
+  id        Int      @id @default(autoincrement())
+
+  nama      String              // nama pelapor (boleh "Warga" saja kalau anonim)
+  kategori  String              // Infrastruktur, Kebersihan, dll
+  jenis     String              // judul singkat: "Lampu Jalan Mati"
+  uraian    String              // isi laporan
+  status    String  @default("baru")   // "baru" | "proses" | "selesai"
+
+  fotoUrl   String?             // optional URL foto (belum kita pakai upload beneran)
+  response  String?             // tanggapan RT (optional)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  wargaId   Int?
+  warga     Warga?  @relation(fields: [wargaId], references: [id])
+}
+
+model Pengurus {
+  id        Int      @id @default(autoincrement())
+  nama      String
+  jabatan   String
+  username  String   @unique
+  password  String   // untuk tugas boleh plain text, tapi production sebaiknya di-hash
+  noHp      String
+  role      String   // contoh: "Full Access", "Keuangan Only"
+  aktif     Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

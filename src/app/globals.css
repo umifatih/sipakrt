@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* custom figma tweaks (optional) */
+:root { color-scheme: light; }
+body { background: #F4F6FB; }

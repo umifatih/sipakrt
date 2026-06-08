@@ -2,12 +2,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 // GET detail surat (opsional, kalau mau dipakai)
 export async function GET(_req: Request, { params }: Params) {
   try {
-    const id = Number(params.id);
+    const { id: rawId } = await params;
+    const id = Number(rawId);
     if (Number.isNaN(id)) {
       return NextResponse.json({ message: 'ID tidak valid.' }, { status: 400 });
     }
@@ -33,7 +34,8 @@ export async function GET(_req: Request, { params }: Params) {
 // PUT /api/surat/[id] -> admin update status & catatan
 export async function PUT(request: Request, { params }: Params) {
   try {
-    const id = Number(params.id);
+    const { id: rawId } = await params;
+    const id = Number(rawId);
     if (Number.isNaN(id)) {
       return NextResponse.json({ message: 'ID tidak valid.' }, { status: 400 });
     }

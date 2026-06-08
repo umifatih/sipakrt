@@ -2,11 +2,12 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 type Params = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export async function DELETE(_req: Request, { params }: Params) {
-  const id = Number(params.id);
+  const { id: rawId } = await params;
+    const id = Number(rawId);
   if (Number.isNaN(id)) {
     return NextResponse.json({ message: 'ID tidak valid' }, { status: 400 });
   }
@@ -24,7 +25,8 @@ export async function DELETE(_req: Request, { params }: Params) {
 }
 
 export async function PATCH(req: Request, { params }: Params) {
-  const id = Number(params.id);
+  const { id: rawId } = await params;
+    const id = Number(rawId);
   if (Number.isNaN(id)) {
     return NextResponse.json({ message: 'ID tidak valid' }, { status: 400 });
   }

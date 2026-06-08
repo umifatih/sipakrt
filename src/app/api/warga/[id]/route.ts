@@ -2,13 +2,14 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 type Params = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 // PUT /api/warga/[id] -> update warga
 export async function PUT(request: Request, { params }: Params) {
   try {
-    const id = Number(params.id);
+    const { id: rawId } = await params;
+    const id = Number(rawId);
     if (Number.isNaN(id)) {
       return NextResponse.json(
         { message: 'ID tidak valid.' },
@@ -70,7 +71,8 @@ export async function PUT(request: Request, { params }: Params) {
 // DELETE /api/warga/[id] -> hapus warga
 export async function DELETE(_request: Request, { params }: Params) {
   try {
-    const id = Number(params.id);
+    const { id: rawId } = await params;
+    const id = Number(rawId);
     if (Number.isNaN(id)) {
       return NextResponse.json(
         { message: 'ID tidak valid.' },

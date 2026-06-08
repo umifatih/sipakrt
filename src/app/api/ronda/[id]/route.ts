@@ -5,10 +5,11 @@ import { prisma } from '@/lib/prisma';
 // UPDATE (PATCH) /api/ronda/:id
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const id = Number(params.id);
+    const { id: rawId } = await params;
+    const id = Number(rawId);
     if (Number.isNaN(id)) {
       return NextResponse.json(
         { message: 'ID tidak valid.' },
@@ -75,10 +76,11 @@ export async function PATCH(
 // DELETE /api/ronda/:id
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const id = Number(params.id);
+    const { id: rawId } = await params;
+    const id = Number(rawId);
     if (Number.isNaN(id)) {
       return NextResponse.json(
         { message: 'ID tidak valid.' },

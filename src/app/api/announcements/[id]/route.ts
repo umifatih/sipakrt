@@ -2,11 +2,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 export async function PUT(request: Request, { params }: Params) {
   try {
-    const id = Number(params.id);
+    const { id: rawId } = await params;
+    const id = Number(rawId);
     const body = await request.json();
     const {
       title,
@@ -48,7 +49,8 @@ export async function PUT(request: Request, { params }: Params) {
 
 export async function DELETE(_request: Request, { params }: Params) {
   try {
-    const id = Number(params.id);
+    const { id: rawId } = await params;
+    const id = Number(rawId);
 
     await prisma.announcement.delete({ where: { id } });
 

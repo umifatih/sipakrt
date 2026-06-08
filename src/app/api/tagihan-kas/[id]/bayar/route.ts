@@ -4,10 +4,11 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const tagihanId = Number(params.id);
+    const { id: rawId } = await params;
+    const tagihanId = Number(rawId);
     if (Number.isNaN(tagihanId)) {
       return NextResponse.json(
         { message: 'ID tagihan tidak valid.' },

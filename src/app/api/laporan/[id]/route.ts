@@ -2,13 +2,14 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 type RouteParams = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 // Update status + response dari admin
 export async function PATCH(req: Request, { params }: RouteParams) {
   try {
-    const id = Number(params.id);
+    const { id: rawId } = await params;
+    const id = Number(rawId);
     if (Number.isNaN(id)) {
       return NextResponse.json(
         { message: 'ID laporan tidak valid.' },

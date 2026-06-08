@@ -69,7 +69,14 @@ export function Calendar({
         day_hidden: "invisible",
         ...classNames,
       }}
-      components={iconComponents}
+      components={{
+  Chevron: ({ orientation, className, ...props }) =>
+    orientation === "left" ? (
+      <ChevronLeft className={cn("size-4", className)} {...props} />
+    ) : (
+      <ChevronRight className={cn("size-4", className)} {...props} />
+    ),
+}}
       {...props}
     />
   );
